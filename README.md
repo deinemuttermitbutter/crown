@@ -1,6 +1,7 @@
 # Crown
 
 A tiny sniper for Discord Nitro gift codes. Intended to be performant over well-featured.
+
 **Automating user accounts on Discord is against their Terms of Service, and may result in your account being banned.**
 
 ![Showcase](showcase.png)
@@ -21,7 +22,7 @@ You can run the sniper in one of two ways, explained below.
 
 ### Using a config file
 
-Create a config.toml file in the same directory as the executable. Enter the following line:
+Create a `config.toml` file in the same directory as the executable. Enter the following line:
 
 ```
 Token = "yourTokenHere"

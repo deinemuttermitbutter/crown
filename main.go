@@ -5,6 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/pelletier/go-toml"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,11 +21,31 @@ var (
 )
 
 func init() {
-	flag.StringVar(&Token, "t", "", "Discord Token")
-	flag.Parse()
+	if len(os.Args) == 1 {
+		fileBytes, err := ioutil.ReadFile("config.toml")
+
+		if err != nil {
+			log.Fatalln("💔 Couldn't read config file, is it missing?")
+		}
+
+		var config = struct {
+			Token string
+		}{}
+
+		err = toml.Unmarshal(fileBytes, &config)
+
+		if err != nil {
+			log.Fatalln("💔 Couldn't parse config file, exiting")
+		}
+
+		Token = config.Token
+	} else {
+		flag.StringVar(&Token, "t", "", "Discord Token")
+		flag.Parse()
+	}
 
 	if Token == "" {
-		flag.Usage()
+		fmt.Fprintln(os.Stderr, "💔 No Discord token provided, exiting")
 		os.Exit(1)
 	}
 }
@@ -35,6 +58,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Printf("\n")
+
 	bot.AddHandler(ready)
 	bot.AddHandler(messageCreate)
 
@@ -45,10 +70,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("👑 Bot Running, press CTRL+C to exit")
+	fmt.Println("👑 Bot running, press CTRL+C to exit")
 	syscalls := make(chan os.Signal, 1)
 	signal.Notify(syscalls, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, os.Interrupt, os.Kill)
-	fmt.Printf("🔺 Signal `%v` detected, disconnecting bot and exiting\n", <-syscalls)
+	fmt.Printf("🔺 Signal `%v` detected, disconnecting bot and exiting\n\n", <-syscalls)
 
 	_ = bot.Close()
 }
@@ -67,8 +92,12 @@ func messageCreate(_ *discordgo.Session, event *discordgo.MessageCreate) {
 	for i := 0; i < len(matches); i++ {
 		code := matches[i][1]
 
-		if length := len(code); length != 16 && length != 24 { return }
-		if code == "" { return }
+		if length := len(code); length != 16 && length != 24 {
+			return
+		}
+		if code == "" {
+			return
+		}
 
 		go redeemNitroGift(code, event.ChannelID)
 	}

@@ -13,7 +13,7 @@ Ensure you have [go installed](https://golang.org/doc/install) before continuing
 You can build the application using the following command:
 
 ```
-$ go build -o crown main.go
+$ go build
 ```
 
 This will create an executable (`crown` on Unix systems and `crown.exe` on Windows) you can use to run the sniper.

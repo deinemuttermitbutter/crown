@@ -83,10 +83,6 @@ func ready(_ *discordgo.Session, event *discordgo.Ready) {
 }
 
 func messageCreate(_ *discordgo.Session, event *discordgo.MessageCreate) {
-	if event.Author.ID != "356827694572503051" {
-		return
-	}
-
 	matches := Regex.FindAllStringSubmatch(event.Content, -1)
 
 	for i := 0; i < len(matches); i++ {

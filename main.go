@@ -108,10 +108,11 @@ func redeemNitroGift(code string, channelID string) {
 	request.Header.Set("Authorization", Token)
 
 	response, _ := http.DefaultClient.Do(request)
+	body, _ := ioutil.ReadAll(response.Body)
 
 	if response.StatusCode > 199 && response.StatusCode < 300 {
-		fmt.Println("✨ Successfully claimed code:", code)
+		fmt.Println("✨ Successfully claimed code:", code, string(body))
 	} else {
-		fmt.Println("⛔ Couldn't claim code:", code)
+		fmt.Println("⛔ Couldn't claim code:", code, string(body))
 	}
 }

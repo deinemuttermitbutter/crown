@@ -13,6 +13,7 @@ import (
 	"os/signal"
 	"regexp"
 	"syscall"
+	"time"
 )
 
 var (
@@ -45,8 +46,7 @@ func init() {
 	}
 
 	if Token == "" {
-		fmt.Fprintln(os.Stderr, "💔 No Discord token provided, exiting")
-		os.Exit(1)
+		log.Fatalln("💔 No Discord token provided, exiting")
 	}
 }
 
@@ -54,8 +54,7 @@ func main() {
 	bot, err := discordgo.New(Token)
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "💔 Couldn't create Discord session:", err)
-		os.Exit(1)
+		log.Fatalln("💔 Couldn't create Discord session:", err)
 	}
 
 	fmt.Printf("\n")
@@ -66,8 +65,7 @@ func main() {
 	err = bot.Open()
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "💔 Couldn't establish WebSocket connection:", err)
-		os.Exit(1)
+		log.Fatalln("💔 Couldn't establish WebSocket connection:", err)
 	}
 
 	fmt.Println("👑 Bot running, press CTRL+C to exit")
@@ -83,6 +81,7 @@ func ready(_ *discordgo.Session, event *discordgo.Ready) {
 }
 
 func messageCreate(_ *discordgo.Session, event *discordgo.MessageCreate) {
+	start := time.Now()
 	matches := Regex.FindAllStringSubmatch(event.Content, -1)
 
 	for i := 0; i < len(matches); i++ {
@@ -95,11 +94,13 @@ func messageCreate(_ *discordgo.Session, event *discordgo.MessageCreate) {
 			return
 		}
 
+		fmt.Println("🛠️  Handler -> Redeem:", time.Since(start))
 		go redeemNitroGift(code, event.ChannelID)
 	}
 }
 
-func redeemNitroGift(code string, channelID string) {
+func redeemNitroGift(code, channelID string) {
+	start := time.Now()
 	requestBody := "{\"channel_id\": \"" + channelID + "\", \"payment_source_id\":null}"
 	url := "https://discordapp.com/api/v8/entitlements/gift-codes/" + code + "/redeem"
 
@@ -115,4 +116,6 @@ func redeemNitroGift(code string, channelID string) {
 	} else {
 		fmt.Println("⛔ Couldn't claim code:", code, string(body))
 	}
+
+	fmt.Println("🛠️  Request:", time.Since(start))
 }
